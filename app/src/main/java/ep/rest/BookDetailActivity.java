@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,8 +96,20 @@ public class BookDetailActivity extends AppCompatActivity implements Callback<Bo
     public void onResponse(Call<Book> call, Response<Book> response) {
         book = response.body();
         Log.i(TAG, "Got result: " + book);
-        tvBookDetail.setText(book.description);
-        toolbarLayout.setTitle(book.title);
+
+        if (response.isSuccessful()) {
+            tvBookDetail.setText(book.description);
+            toolbarLayout.setTitle(book.title);
+        } else {
+            String errorMessage;
+            try {
+                errorMessage = "An error occurred: " + response.errorBody().string();
+            } catch (IOException e) {
+                errorMessage = "An error occurred: error while decoding the error message.";
+            }
+            Log.e(TAG, errorMessage);
+            tvBookDetail.setText(errorMessage);
+        }
     }
 
     @Override
