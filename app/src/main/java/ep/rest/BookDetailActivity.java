@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,7 +73,21 @@ public class BookDetailActivity extends AppCompatActivity implements Callback<Bo
     }
 
     private void deleteBook() {
-        // todo
+        BookService.getInstance().delete(book.id).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.i(TAG, "Deletion succeeded");
+                final Intent intent = new Intent(BookDetailActivity.this, MainActivity.class);
+                startActivity(intent);
+                Toast.makeText(BookDetailActivity.this, "Deleted: " + book.title, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.i(TAG, "Deletion failed: " + t.getMessage(), t);
+                Toast.makeText(BookDetailActivity.this, "Deletion failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
