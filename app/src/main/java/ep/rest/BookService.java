@@ -14,7 +14,7 @@ import retrofit2.http.Path;
 
 public class BookService {
     interface RestApi {
-        String URL = "http://10.0.2.2:8080/netbeans/mvc-rest/api/";
+        String URL = "http://192.168.34.117/netbeans/mvc-rest/api/";
 
         @GET("books")
         Call<List<Book>> getAll();

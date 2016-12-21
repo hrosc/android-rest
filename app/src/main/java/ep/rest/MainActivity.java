@@ -2,13 +2,14 @@ package ep.rest;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -22,9 +23,9 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements Callback<List<Book>> {
     private static final String TAG = MainActivity.class.getCanonicalName();
 
-    private SwipeRefreshLayout container;
-    private Button button;
-    private ListView list;
+    private SwipeRefreshLayout swiper;
+    private FloatingActionButton fabAdd;
+    private RecyclerView rvBooks;
     private final List<Book> books = new ArrayList<>();
     private BookAdapter adapter;
 
@@ -33,33 +34,33 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Boo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        list = (ListView) findViewById(R.id.items);
-
         adapter = new BookAdapter(this, books);
-        list.setAdapter(adapter);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        adapter.setOnItemClickListener(new BookAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(View itemView, int position) {
                 final Intent intent = new Intent(MainActivity.this, BookDetailActivity.class);
-                intent.putExtra("ep.rest.id", books.get(i).id);
+                intent.putExtra("ep.rest.id", books.get(position).id);
                 startActivity(intent);
             }
         });
+        rvBooks = (RecyclerView) findViewById(R.id.items);
+        rvBooks.setAdapter(adapter);
+        rvBooks.setLayoutManager(new LinearLayoutManager(this));
+        rvBooks.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        container = (SwipeRefreshLayout) findViewById(R.id.container);
-        container.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        swiper = (SwipeRefreshLayout) findViewById(R.id.swiper);
+        swiper.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 BookService.getInstance().getAll().enqueue(MainActivity.this);
             }
         });
 
-        button = (Button) findViewById(R.id.add_button);
-        button.setOnClickListener(new View.OnClickListener() {
+        fabAdd = (FloatingActionButton) findViewById(R.id.fab_add);
+        fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final Intent intent = new Intent(MainActivity.this, BookFormActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(MainActivity.this, BookFormActivity.class));
             }
         });
 
@@ -72,8 +73,9 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Boo
 
         if (response.isSuccessful()) {
             Log.i(TAG, "Hits: " + hits.size());
-            adapter.clear();
-            adapter.addAll(hits);
+            books.clear();
+            books.addAll(hits);
+            adapter.notifyDataSetChanged();
         } else {
             String errorMessage;
             try {
@@ -84,12 +86,12 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Boo
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
             Log.e(TAG, errorMessage);
         }
-        container.setRefreshing(false);
+        swiper.setRefreshing(false);
     }
 
     @Override
     public void onFailure(Call<List<Book>> call, Throwable t) {
         Log.w(TAG, "Error: " + t.getMessage(), t);
-        container.setRefreshing(false);
+        swiper.setRefreshing(false);
     }
 }
