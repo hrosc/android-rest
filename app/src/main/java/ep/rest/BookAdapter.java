@@ -15,6 +15,16 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     private final List<Book> books;
     private final Context context;
 
+    interface OnItemClickListener {
+        void onItemClick(View itemView, int position);
+    }
+
+    private OnItemClickListener clickListener;
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.clickListener = listener;
+    }
+
     public BookAdapter(Context context, List<Book> books) {
         this.context = context;
         this.books = books;
@@ -29,7 +39,7 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         final Context context = parent.getContext();
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View contactView = inflater.inflate(R.layout.booklist_element, parent, false);
-        return new ViewHolder(contactView);
+        return new ViewHolder(contactView, clickListener);
     }
 
     @Override
@@ -45,20 +55,10 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         return books.size();
     }
 
-    interface OnItemClickListener {
-        void onItemClick(View itemView, int position);
-    }
-
-    private OnItemClickListener clickListener;
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.clickListener = listener;
-    }
-
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvAuthor, tvPrice;
 
-        ViewHolder(final View itemView) {
+        ViewHolder(final View itemView, final OnItemClickListener clickListener) {
             super(itemView);
             tvTitle = (TextView) itemView.findViewById(R.id.tv_title);
             tvAuthor = (TextView) itemView.findViewById(R.id.tv_author);
