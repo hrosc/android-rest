@@ -1,37 +1,25 @@
 package ep.rest;
 
 import android.content.Context;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
 
     private final List<Book> books;
-    private final Context context;
-
-    interface OnItemClickListener {
-        void onItemClick(View itemView, int position);
-    }
 
     private OnItemClickListener clickListener;
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.clickListener = listener;
-    }
-
-    public BookAdapter(Context context, List<Book> books) {
-        this.context = context;
-        this.books = books;
-    }
-
-    public Context getContext() {
-        return context;
+    public BookAdapter() {
+        books = new ArrayList<>();
     }
 
     @Override
@@ -55,6 +43,25 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         return books.size();
     }
 
+    public Book getItem(int position) {
+        return books.get(position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.clickListener = listener;
+    }
+
+    /**
+     * Namenski vmesnik za lovljenje klikov na recyclerview-ju
+     * https://guides.codepath.com/android/using-the-recyclerview#attaching-click-handlers-to-items
+     */
+    interface OnItemClickListener {
+        void onItemClick(View itemView, int position);
+    }
+
+    /**
+     * Implementacija zgornjega vmesnika
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvAuthor, tvPrice;
 
@@ -75,5 +82,52 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
                 }
             });
         }
+    }
+
+    /**
+     * Izračuna razlike med dvema seznamoma in posledično naredi minimalno
+     * število potrebnih sprememb.
+     * https://guides.codepath.com/android/using-the-recyclerview#diffing-larger-changes
+     */
+    static class BookDiffCallback extends DiffUtil.Callback {
+        private final List<Book> oldList, newList;
+
+        BookDiffCallback(List<Book> oldList, List<Book> newList) {
+            this.oldList = oldList;
+            this.newList = newList;
+        }
+
+        @Override
+        public int getOldListSize() {
+            return oldList.size();
+        }
+
+        @Override
+        public int getNewListSize() {
+            return newList.size();
+        }
+
+        @Override
+        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+            return oldList.get(oldItemPosition).id == newList.get(newItemPosition).id;
+        }
+
+        @Override
+        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+            return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
+        }
+    }
+
+    /*
+     * Uporaba razreda BookDiffCallback in posodobitev recyclerview-ja
+     * https://guides.codepath.com/android/using-the-recyclerview#diffing-larger-changes
+     */
+    public void swap(List<Book> newBooks) {
+        final BookDiffCallback diffCallback = new BookDiffCallback(books, newBooks);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        books.clear();
+        books.addAll(newBooks);
+        diffResult.dispatchUpdatesTo(this);
     }
 }

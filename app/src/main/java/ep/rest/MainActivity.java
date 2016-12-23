@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -26,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Boo
     private SwipeRefreshLayout swiper;
     private FloatingActionButton fabAdd;
     private RecyclerView rvBooks;
-    private final List<Book> books = new ArrayList<>();
     private BookAdapter adapter;
 
     @Override
@@ -34,15 +32,16 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Boo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        adapter = new BookAdapter(this, books);
+        adapter = new BookAdapter();
         adapter.setOnItemClickListener(new BookAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 final Intent intent = new Intent(MainActivity.this, BookDetailActivity.class);
-                intent.putExtra("ep.rest.id", books.get(position).id);
+                intent.putExtra("ep.rest.id", adapter.getItem(position).id);
                 startActivity(intent);
             }
         });
+
         rvBooks = (RecyclerView) findViewById(R.id.items);
         rvBooks.setAdapter(adapter);
         rvBooks.setLayoutManager(new LinearLayoutManager(this));
@@ -73,9 +72,7 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Boo
 
         if (response.isSuccessful()) {
             Log.i(TAG, "Hits: " + hits.size());
-            books.clear();
-            books.addAll(hits);
-            adapter.notifyDataSetChanged();
+            adapter.swap(hits);
         } else {
             String errorMessage;
             try {
