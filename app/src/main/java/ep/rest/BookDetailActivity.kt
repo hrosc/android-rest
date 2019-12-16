@@ -3,8 +3,8 @@ package ep.rest
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_book_detail.*
 import kotlinx.android.synthetic.main.content_book_detail.*
 import retrofit2.Call
@@ -47,7 +47,16 @@ class BookDetailActivity : AppCompatActivity(), Callback<Book> {
     }
 
     private fun deleteBook() {
-        // todo
+        val id = intent.getIntExtra("ep.rest.id", 0)
+        BookService.instance.delete(id).enqueue(object : Callback<Void?> {
+            override fun onFailure(call: Call<Void?>?, t: Throwable?) {
+                Log.w(TAG, "An error occurred while deleting: ${t?.message}")
+            }
+
+            override fun onResponse(call: Call<Void?>?, response: Response<Void?>?) {
+                startActivity(Intent(this@BookDetailActivity, MainActivity::class.java))
+            }
+        })
     }
 
     override fun onResponse(call: Call<Book>, response: Response<Book>) {
