@@ -21,12 +21,18 @@ class BookAdapter(context: Context) : ArrayAdapter<Book>(context, 0, ArrayList()
         val tvAuthor = view.findViewById<TextView>(R.id.tvAuthor)
         val tvPrice = view.findViewById<TextView>(R.id.tvPrice)
 
-
+/*
         val book = getItem(position)
 
         tvTitle.text = book?.title
         tvAuthor.text = book?.author
         tvPrice.text = String.format(Locale.ENGLISH, "%.2f EUR", book?.price)
+*/
+        getItem(position)?.let {
+            tvTitle.text = it.title
+            tvAuthor.text = it.author
+            tvPrice.text = String.format(Locale.ENGLISH, "%.2f EUR", it.price)
+        }
 
         return view
     }

@@ -48,6 +48,17 @@ class BookDetailActivity : AppCompatActivity(), Callback<Book> {
 
     private fun deleteBook() {
         // todo
+        book?.let {
+            BookService.instance.delete(it.id).enqueue(object: Callback<Void?> {
+                override fun onFailure(call: Call<Void?>, t: Throwable) {
+                    Log.w(TAG, "Napaka: ${t.localizedMessage}")
+                }
+
+                override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                    startActivity(Intent(this@BookDetailActivity, MainActivity::class.java));
+                }
+            })
+        }
     }
 
     override fun onResponse(call: Call<Book>, response: Response<Book>) {

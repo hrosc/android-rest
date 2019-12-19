@@ -35,6 +35,9 @@ object BookService {
                    @Field("price") price: Double,
                    @Field("year") year: Int,
                    @Field("description") description: String): Call<Void>
+
+        @DELETE("books/{id}")
+        fun delete(@Path("id") id: Int): Call<Void>
     }
 
     val instance: RestApi by lazy {
